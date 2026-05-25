@@ -1,330 +1,212 @@
-import React, { useEffect, useState } from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
+import React, { useEffect, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 
-
-
-const DefaultHome = () => {
-
-
-    const navigate = useNavigate();
-     const { username } = useParams();
-     const [animes, setAnimes] = useState()
-
-    const searchAnime = async () => {
-      const animeurl = await fetch (`https://api.jikan.moe/v4/top/anime`)
-      const topAnime = await animeurl.json();
-      console.log(topAnime.data[0]);
-      setAnimes(topAnime.data)
-    
-    }
-
-    useEffect(() => {
-     searchAnime()
-    }, [])
-    
-     
-
-    const movies = [
+const movies = [
   {
-    "id":46562,
-    "name": "The Last of Us",
-    "image": "https://static.tvmaze.com/uploads/images/medium_portrait/563/1409008.jpg",
-    "premiered": "2023-01-15"
+    id: 46562,
+    name: "The Last of Us",
+    image: "https://static.tvmaze.com/uploads/images/medium_portrait/563/1409008.jpg",
+    premiered: "2023-01-15",
+    tag: "Survival drama",
   },
   {
-    "id": 82,
-    "name": "Game of Thrones",
-    "image": "https://static.tvmaze.com/uploads/images/medium_portrait/498/1245274.jpg",
-    "premiered": "2011-04-17"
-  },
-   {
-    "id": 2993,
-    "name": "Stranger Things",
-    "image": "https://static.tvmaze.com/uploads/images/medium_portrait/200/501942.jpg",
-    "premiered": "2016-07-15"
+    id: 82,
+    name: "Game of Thrones",
+    image: "https://static.tvmaze.com/uploads/images/medium_portrait/498/1245274.jpg",
+    premiered: "2011-04-17",
+    tag: "Fantasy epic",
   },
   {
-    "id": 169,
-    "name": "Breaking Bad",
-    "image": "https://static.tvmaze.com/uploads/images/medium_portrait/0/2400.jpg",
-    "premiered": "2008-01-20"
+    id: 2993,
+    name: "Stranger Things",
+    image: "https://static.tvmaze.com/uploads/images/medium_portrait/200/501942.jpg",
+    premiered: "2016-07-15",
+    tag: "Sci-fi mystery",
   },
   {
-    "id": 44778,
-    "name": "House of the Dragon",
-    "image": "https://static.tvmaze.com/uploads/images/medium_portrait/530/1325279.jpg",
-    "premiered": "2022-08-21"
+    id: 169,
+    name: "Breaking Bad",
+    image: "https://static.tvmaze.com/uploads/images/medium_portrait/0/2400.jpg",
+    premiered: "2008-01-20",
+    tag: "Crime classic",
   },
   {
-    "id": 168,
-    "name": "Dexter",
-    "image": "https://static.tvmaze.com/uploads/images/medium_portrait/0/2147.jpg",
-    "premiered": "2006-10-01"
+    id: 44778,
+    name: "House of the Dragon",
+    image: "https://static.tvmaze.com/uploads/images/medium_portrait/530/1325279.jpg",
+    premiered: "2022-08-21",
+    tag: "Power struggle",
   },
   {
-    "id": 139,
-    "name": "Doctor Who",
-    "image": "https://static.tvmaze.com/uploads/images/medium_portrait/67/168792.jpg",
-    "premiered": "2005-03-26"
+    id: 168,
+    name: "Dexter",
+    image: "https://static.tvmaze.com/uploads/images/medium_portrait/0/2147.jpg",
+    premiered: "2006-10-01",
+    tag: "Dark thriller",
   },
-  {
-    "id": 73,
-    "name": "The Sopranos",
-    "image": "https://static.tvmaze.com/uploads/images/medium_portrait/11/27645.jpg",
-    "premiered": "1999-01-10"
-  },
-  {
-    "id": 250,
-    "name": "Better Call Saul",
-    "image": "https://static.tvmaze.com/uploads/images/medium_portrait/207/519083.jpg",
-    "premiered": "2015-02-08"
-  },
-  {
-    "id": 66,
-    "name": "The Office (US)",
-    "image": "https://static.tvmaze.com/uploads/images/medium_portrait/85/213184.jpg",
-    "premiered": "2005-03-24"
-  },
-  
-]
+];
 
-
-    // const animes = [
-    //     {
-    //         id: "",
-    //         name: "",
-    //         url: "",
-    //         rating: "",
-    //     },
-    //     {
-    //         id: "",
-    //         name: "",
-    //         url: "",
-    //         rating: "",
-    //     },
-    //     {
-    //         id: "",
-    //         name: "",
-    //         url: "",
-    //         rating: "",
-    //     },
-    //     {
-    //         id: "",
-    //         name: "",
-    //         url: "",
-    //         rating: "",
-    //     },
-    //     {
-    //         id: "",
-    //         name: "",
-    //         url: "",
-    //         rating: "",
-    //     },
-    //     {
-    //         id: "",
-    //         name: "",
-    //         url: "",
-    //         rating: "",
-    //     },
-    //     {
-    //         id: "",
-    //         name: "",
-    //         url: "",
-    //         rating: "",
-    //     },
-
-    // ]
-
-    const actors = [
+const actors = [
   {
     id: 49567,
     name: "Robert Downey Jr.",
     image: "https://static.tvmaze.com/uploads/images/medium_portrait/5/13304.jpg",
     dob: "1965-04-04",
+    tag: "Screen icon",
   },
   {
     id: 26971,
     name: "Jenna Ortega",
     image: "https://static.tvmaze.com/uploads/images/medium_portrait/432/1081921.jpg",
     dob: "2002-09-27",
-  },
-  {
-    id: 66994,
-    name: "Kylie Jenner",
-    image: "https://static.tvmaze.com/uploads/images/medium_portrait/460/1150485.jpg",
-    dob: "1997-08-10",
+    tag: "Modern favorite",
   },
   {
     id: 47332,
-    name: "Dwayne 'The Rock' Johnson",
+    name: "Dwayne Johnson",
     image: "https://static.tvmaze.com/uploads/images/medium_portrait/11/29580.jpg",
     dob: "1972-05-02",
+    tag: "Action star",
   },
   {
     id: 71223,
     name: "Chris Hemsworth",
     image: "https://static.tvmaze.com/uploads/images/medium_portrait/425/1062571.jpg",
     dob: "1983-08-11",
+    tag: "Blockbuster lead",
   },
   {
-    id: 52302,
-    name: "Johnny Depp",
-    image: "https://static.tvmaze.com/uploads/images/medium_portrait/7/18275.jpg",
-    dob: "1963-06-09",
-  },
-  {
-    id:70077,
+    id: 70077,
     name: "Leonardo DiCaprio",
     image: "https://static.tvmaze.com/uploads/images/medium_portrait/269/672763.jpg",
     dob: "1974-11-11",
-  },
-  {
-    id:101172,
-    name: "Salman Khan",
-    image: "https://static.tvmaze.com/uploads/images/medium_portrait/32/80640.jpg",
-    dob: "1965-12-27",
+    tag: "Award winner",
   },
   {
     id: 68357,
     name: "Gal Gadot",
     image: "https://static.tvmaze.com/uploads/images/medium_portrait/118/295685.jpg",
     dob: "1985-04-30",
-  },
-  {
-    id: 27638,
-    name: "Will Smith",
-    image: "https://static.tvmaze.com/uploads/images/medium_portrait/449/1123849.jpg",
-    dob: "1968-09-25",
+    tag: "Global star",
   },
 ];
 
+const fallbackPoster =
+  "https://yt3.googleusercontent.com/Z1scaDhrH194d4AygOpJhFzM-ViGyvGLXfB5hGsNNlBRerrx98x9Knszx9-VWizx5lMZPlECOrE=s120-c-k-c0x00ffffff-no-rj";
 
+const SectionHeader = ({ eyebrow, title, copy }) => (
+  <div className="mb-5 flex flex-col gap-2 sm:mb-6">
+    <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-red-500">
+      {eyebrow}
+    </p>
+    <h3 className="text-2xl font-bold text-white sm:text-3xl">{title}</h3>
+    <p className="max-w-2xl text-sm text-gray-400 sm:text-base">{copy}</p>
+  </div>
+);
 
-    return (
-        <>
-            <div className='relative w-screen h-full bg-black'>
+const DefaultHome = () => {
+  const navigate = useNavigate();
+  const { username } = useParams();
+  const [animes, setAnimes] = useState([]);
 
-                <div className='py-10 px-10 lg:px-30 space-y-15'>
+  useEffect(() => {
+    const searchAnime = async () => {
+      try {
+        const animeResponse = await fetch("https://api.jikan.moe/v4/top/anime");
+        const topAnime = await animeResponse.json();
+        setAnimes(topAnime.data || []);
+      } catch (error) {
+        setAnimes([]);
+      }
+    };
 
+    searchAnime();
+  }, []);
 
-                    <div className='text-xl mb-3'>
-                        <b><p>Popular</p></b>
-                    </div>
-                    <div className='flex w-full h-full gap-5 overflow-x-auto overflow-y-hidden scrollbar-hide'>
+  const rails = [
+    {
+      key: "popular",
+      eyebrow: "Binge now",
+      title: "Popular series to start with",
+      copy: "A fast, scrollable lineup designed for thumbs first and still comfortable on larger screens.",
+      items: movies,
+      onClick: (item) => navigate(`/details/${username}/${item.id}`),
+      getImage: (item) => item.image,
+      getTitle: (item) => item.name,
+      getMeta: (item) => item.premiered,
+      getTag: (item) => item.tag,
+    },
+    {
+      key: "anime",
+      eyebrow: "Top anime",
+      title: "Popular anime worth opening next",
+      copy: "Featured titles with strong cover art and quick details access from the home experience.",
+      items: animes.slice(0, 12),
+      onClick: (item) => navigate(`/anime/${username}/${item.mal_id}`),
+      getImage: (item) => item.images?.jpg?.large_image_url,
+      getTitle: (item) => item.title,
+      getMeta: (item) => item.aired?.string?.split(" to ")[0] || "Ongoing",
+      getTag: (item) => item.score ? `${item.score} score` : "Fan favorite",
+    },
+    {
+      key: "actors",
+      eyebrow: "Faces to know",
+      title: "Actors trending with viewers",
+      copy: "A cleaner people rail with more readable cards and better mobile sizing.",
+      items: actors,
+      onClick: (item) => navigate(`/actor/${username}/${item.id}`),
+      getImage: (item) => item.image,
+      getTitle: (item) => item.name,
+      getMeta: (item) => item.dob,
+      getTag: (item) => item.tag,
+    },
+  ];
 
-                        {movies.map((movie) => (
-                            <div key={movie.id} className='h-full w-60'
-                            onClick={()=> navigate(`/Smtv/${username}/details/${movie.id}`)}
-                            >
-                                <div className="relative h-50 w-40 lg:h-80 lg:w-60 items-center justify-center">
-                                    <img className=" object-cover object-top w-full h-full  rounded-xl h-full"
-                                        src={movie.image ? movie.image : "https://yt3.googleusercontent.com/Z1scaDhrH194d4AygOpJhFzM-ViGyvGLXfB5hGsNNlBRerrx98x9Knszx9-VWizx5lMZPlECOrE=s120-c-k-c0x00ffffff-no-rj"} />
-                                </div>
+  return (
+    <div className="relative w-screen bg-black">
+      <div className="mx-auto flex w-full max-w-7xl flex-col gap-12 px-4 py-10 sm:px-5 sm:py-12 lg:gap-16 lg:px-8 lg:py-16">
+        {rails.map((section) => (
+          <section key={section.key}>
+            <SectionHeader
+              eyebrow={section.eyebrow}
+              title={section.title}
+              copy={section.copy}
+            />
 
-                                <div className="relative flex flex-col py-2 mt-2 h-full">
-                                    <b>
-                                        <p className="">{movie.name} </p>
-                                    </b>
-                                    <div className="flex  justify-between gap-2 mt-2 text-gray-500">
-                                        <div>
-                                            <p>{movie.premiered}</p>
-                                        </div>
+            <div className="flex gap-3 overflow-x-auto pb-2 sm:gap-4">
+              {section.items.map((item) => (
+                <article
+                  key={item.id || item.mal_id}
+                  onClick={() => section.onClick(item)}
+                  className="group flex w-[11.5rem] shrink-0 cursor-pointer flex-col rounded-[24px] border border-white/8 bg-white/[0.03] p-2.5 transition hover:border-white/15 hover:bg-white/[0.05] sm:w-[13rem] lg:w-[15rem]"
+                >
+                  <div className="relative overflow-hidden rounded-[20px]">
+                    <img
+                      className="h-60 w-full object-cover transition duration-300 group-hover:scale-[1.03] sm:h-72 lg:h-80"
+                      src={section.getImage(item) || fallbackPoster}
+                      alt={section.getTitle(item)}
+                      loading="lazy"
+                    />
+                    <div className="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-black/85 to-transparent" />
+                    <span className="absolute left-3 top-3 rounded-full bg-black/65 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-white backdrop-blur-sm">
+                      {section.getTag(item)}
+                    </span>
+                  </div>
 
-                                        <div className="flex gap-4">
-                                            <p>{movie.rating} ⭐</p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-
-
-                    <div className='text-xl mb-3'>
-                        <b><p>Popular Animes</p></b>
-                    </div>
-                    <div className='flex w-full h-full overflow-x-auto overflow-y-hidden scrollbar-hide gap-5'>
-
-                        {animes && animes.map((anime, index) => (
-                            <div key={index} className='h-full w-60'
-                            onClick={()=> navigate(`/Smtv/${username}/anime/${anime.mal_id}`)}>
-
-                                <div className="relative h-50 w-40 lg:h-80 lg:w-60 items-center justify-center">
-                                    <img className=" object-cover object-top w-full h-full  rounded-xl h-full"
-                                        src={ anime.images?.jpg.large_image_url || "https://yt3.googleusercontent.com/Z1scaDhrH194d4AygOpJhFzM-ViGyvGLXfB5hGsNNlBRerrx98x9Knszx9-VWizx5lMZPlECOrE=s120-c-k-c0x00ffffff-no-rj"} />
-                                </div>
-
-                                <div className="relative flex flex-col py-2 mt-2 h-full">
-                                    <b>
-                                        <p className="">{anime.title} </p>
-                                    </b>
-                                    <div className="flex  justify-between gap-2 mt-2 text-gray-500">
-                                        <div>
-                                            <p>{anime.aired?.string?.split(" to ")[0]}</p>
-                                        </div>
-
-                                        <div className="flex gap-4">
-                                            <p>{anime.score} ⭐</p>
-                                        </div>
-                                    </div>
-                                </div>
-
-                            </div>
-                        ))}
-                        <div>
-
-                        </div>
-                    </div>
-
-
-
-
-
-
-                    <div className='text-xl mb-3'>
-                        <b><p>Top Actors</p></b>
-                    </div>
-
-
-                    <div className='flex w-full h-full overflow-x-auto overflow-y-hidden scrollbar-hide gap-5'>
-
-
-
-                        {actors.map((actor, index) => (
-                            <div 
-                            onClick={()=> navigate(`/Actor/${username}/${actor.id}`)}
-                            key={index} className='h-full w-60'>
-                            
-                                <div className="relative h-50 w-40 lg:h-80 lg:w-60 items-center justify-center">
-                                    <img className=" object-cover object-top w-full h-full  rounded-xl h-full"
-                                        src={actor.image ? actor.image : "https://yt3.googleusercontent.com/Z1scaDhrH194d4AygOpJhFzM-ViGyvGLXfB5hGsNNlBRerrx98x9Knszx9-VWizx5lMZPlECOrE=s120-c-k-c0x00ffffff-no-rj"} />
-                                </div>
-
-                                <div className="relative flex flex-col py-2 mt-2 h-full">
-                                    <b>
-                                        <p className="">{actor.name} </p>
-                                    </b>
-                                    <div className="flex  justify-between gap-2 mt-2 text-gray-500">
-                                        <div className="flex gap-4">
-                                            <p>{actor.dob} ⭐</p>
-                                        </div>
-                                    </div>
-                                </div>
-
-                            </div>
-                        ))}
-                        <div>
-
-                        </div>
-                    </div>
-
-
-
-
-                </div>
+                  <div className="flex flex-1 flex-col gap-2 px-1 pb-1 pt-3">
+                    <h4 className="line-clamp-2 text-base font-semibold text-white sm:text-lg">
+                      {section.getTitle(item)}
+                    </h4>
+                    <p className="text-sm text-gray-400">{section.getMeta(item)}</p>
+                  </div>
+                </article>
+              ))}
             </div>
-        </>
-    )
-}
+          </section>
+        ))}
+      </div>
+    </div>
+  );
+};
 
-export default DefaultHome
+export default DefaultHome;

@@ -12,90 +12,101 @@ const Login = () => {
 
     const navigate = useNavigate();
 
-   
+
     const [name, setName] = useState('')
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
 
-const [searchParams] = useSearchParams();
-const action = searchParams.get("action");
+    const [searchParams] = useSearchParams();
+    const action = searchParams.get("action");
 
- const UserData = useSelector((state) => state.note.users)
- console.log(UserData);
- 
-    
+    const UserData = useSelector((state) => state.note.users)
+    // console.log(UserData);
 
 
 
-    function submitNow (e) {
-        e.preventDefault() // details will stay cause page will not reload 
+
+
+    function submitNow(e) {
+        console.log("S1");
         
+        e.preventDefault() // details will stay cause page will not reload 
+
         if (!password || password.length < 8) {
             toast.error("Password too short — minimum 8 characters")
             return
         }
 
-    // Check for uppercase
-    if (!/[A-Z]/.test(password)) {
-        toast.error("Include at least one uppercase letter (A-Z)")
-        return
-    }
+     console.log("S2");
 
-    // Check for lowercase
-    if (!/[a-z]/.test(password)) {
-        toast.error("Include at least one lowercase letter (a-z)")
-        return
-    }
 
-    // Check for number
-    if (!/[0-9]/.test(password)) {
-        toast.error("Include at least one number (0-9)")
-        return
-    }
+        // Check for uppercase
+        if (!/[A-Z]/.test(password)) {
+            toast.error("Include at least one uppercase letter (A-Z)")
+            return
+        }
 
-    // Check for special character
-    if (!/[!@#$%^&*(),.?":{}|<>]/.test(password)) {
-        toast.error("Include at least one special character (!, @, #, etc.)")
-        return
-    }
+        // Check for lowercase
+        if (!/[a-z]/.test(password)) {
+            toast.error("Include at least one lowercase letter (a-z)")
+            return
+        }
 
-        
+        // Check for number
+        if (!/[0-9]/.test(password)) {
+            toast.error("Include at least one number (0-9)")
+            return
+        }
+
+        // Check for special character
+        if (!/[!@#$%^&*(),.?":{}|<>]/.test(password)) {
+            toast.error("Include at least one special character (!, @, #, etc.)")
+            return
+        }
+
+
 
         if (action === "signup") {
-            const registerUserData = {
-            name: name, 
-            email:email,
-            password:password,
-            username: `${name || "guest"}SMTV${Date.now().toString(36)}`,
-            favorites: []
+                 console.log("S3-signup");
 
-        }
+            const registerUserData = {
+                name: name,
+                email: email,
+                password: password,
+                username: `${name || "guest"}SMTV${Date.now().toString(36)}`,
+                favorites: []
+
+            }
             dispatch(registerUser(registerUserData));
-            navigate(`/Smtv/${registerUserData.username}`)
+            navigate(`/search/${registerUserData.username}`)
         } else {
+                 console.log("S3-login");
+
 
             const registerUserData = {
-            email:email,
-            password:password,
-        }
-            const emailExist = UserData.find((U)=> 
+                email: email,
+                password: password,
+            }
+            const emailExist = UserData.find((U) =>
                 U?.email?.toLowerCase().includes(registerUserData.email.toLowerCase()))
-          console.log(emailExist);
-          
-            const passMatch = UserData.some((U)=> 
-            U?.password?.toLowerCase().includes(registerUserData.password.toLowerCase()))
-             
-            
-           if (emailExist && passMatch) {
+            console.log(emailExist);
+
+            const passMatch = UserData.some((U) =>
+                U?.password?.toLowerCase().includes(registerUserData.password.toLowerCase()))
+
+
+            if (emailExist && passMatch) {
                 toast.success(`Welcome back ${emailExist.username}`, { autoClose: 1000 })
-                navigate(`/Smtv/${emailExist.username}`)
+                navigate(`/search/${emailExist.username}`)
+                console.log("hello bhai !");
+
             } else {
                 toast.error('Invalid email or password')
             }
         }
-        
+
         console.log("")
-       
+
 
 
     }
@@ -148,19 +159,20 @@ const action = searchParams.get("action");
                         )}</div> */}
 
 
-                        <form onSubmit={(e) => { submitNow (e)
+                        <form onSubmit={(e) => {
+                            submitNow(e)
                         }} className='flex flex-col text-center justify-center mt-5 gap-5 w-[96%]  '
                             action="">
-                                {action?.toLowerCase() === "signup" && (
+                            {action?.toLowerCase() === "signup" && (
                                 <input className='p-4 rounded'
-                                type="name" name="" id="1" placeholder='Enter your name'
-                                value={name} onChange={(e)=> (setName(e.target.value))} />)}
+                                    type="name" name="" id="1" placeholder='Enter your name'
+                                    value={name} onChange={(e) => (setName(e.target.value))} />)}
                             <input className='p-4 rounded'
                                 type="email" name="" id="2" placeholder='Enter your email'
-                                value={email} onChange={(e)=> (setEmail(e.target.value))} />
+                                value={email} onChange={(e) => (setEmail(e.target.value))} />
                             <input className='p-4 rounded'
                                 type="password" name="" id="3" placeholder='Enter your password'
-                                 value={password} onChange={(e)=> (setPassword(e.target.value))}  />
+                                value={password} onChange={(e) => (setPassword(e.target.value))} />
                             <button className='p-2 rounded bg-red-600'>{action?.toLowerCase() === "login" ? "Sign In" : "Sign Up"}</button>
                             <p>OR</p>
                             <button className='p-2 rounded ' style={{ backgroundColor: 'rgba(128, 128, 128, 0.4)' }}>Use a sign-in-code</button>
@@ -181,13 +193,6 @@ const action = searchParams.get("action");
                         </form>
                     </div>
                 </div>
-
-
-
-
-
-
-
 
 
 

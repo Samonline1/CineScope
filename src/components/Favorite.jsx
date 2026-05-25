@@ -2,7 +2,6 @@ import React from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { deleteFav } from '../redux/featureSlice';
 import { useNavigate, useParams } from 'react-router-dom';
-import SearchNav from './SearchNav';
 import Footer from './footer';
 import { toast } from 'react-toastify';
 import { IoHeartDislikeSharp } from "react-icons/io5";
@@ -36,8 +35,7 @@ const Favorite = () => {
 
   return (
 
-    <div className='w-screen h-full p-5 pt-15 gap-10 bg-black px-7 lg:px-20 py-20'>
-    <SearchNav />
+    <div className='w-screen h-full gap-10 bg-black px-4 py-8 sm:px-6 lg:px-20 lg:py-12'>
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 relative h-full w-full mt-10 sm:px-5 lg:px-10 gap-2 sm:gap-3 lg:gap-10">
 
       {favorites &&
@@ -50,7 +48,7 @@ const Favorite = () => {
   {/* Image section */}
   <div className="relative w-40 h-[90%] lg:w-60 lg:h-full">
     <img
-      onClick={() => navigate(`/Smtv/${username}/details/${fav.id}`)}
+      onClick={() => navigate(`/details/${username}/${fav.id}`)}
       className="object-cover bg-red-600 w-full h-full cursor-pointer w-full h-80"
       src={
         fav.img
@@ -58,6 +56,7 @@ const Favorite = () => {
           : "https://yt3.googleusercontent.com/Z1scaDhrH194d4AygOpJhFzM-ViGyvGLXfB5hGsNNlBRerrx98x9Knszx9-VWizx5lMZPlECOrE=s120-c-k-c0x00ffffff-no-rj"
       }
       alt=""
+      loading="lazy"
     />
     <p
       className="absolute top-2 right-3 cursor-pointer hover:scale-110 transition-transform text-2xl p-2 shaddow-lg rounded-full bg-black/50 text-red-600"

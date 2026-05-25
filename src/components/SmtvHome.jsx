@@ -80,11 +80,11 @@ class="homebutton hidden sm:flex"
           <div className="flex ml-4 gap-5 text-md items-center">
             <p className='text-xl text-gray-200 cursor-pointer'
               // onClick={()=> setSearchBar(true)}
-              onClick={() => navigate(`/Smtv/${username}/search`)}
+              onClick={() => navigate(`/search/${username}`)}
 
             ><img className='h-8 w-8 rounded-[50%] bg-red-800' src={Sicon} alt="" srcset="" /></p>
             <div className='flex gap-2 items-center'
-              onClick={() => navigate(`/Smtv/${username}/search`)}
+              onClick={() => navigate(`/search/${username}`)}
             >
               <p className='hidden sm:flex'
               >Hello, {LoggedUser}</p>
@@ -106,7 +106,7 @@ class="homebutton hidden sm:flex"
           <div className='flex justify-center items-center  absolute z-10 h-13 w-full mt-30 '>
             <div className='flex justify-start items-center w-[50%] gap-2 border border-[0.5px] border-gray-900 rounded-xl backdrop-blur-sm bg-black/2 rounded-xl'>
             <input className=' w-full outline-none focus:ring-0 h-full rounded-xl p-3 text-gray-200' type="text" placeholder='Search Movies, Shows, Anime and Actors' value={input} onChange={(e)=> setInput(e.target.value)} />
-            <button className='flex w-14 items-center justify-center p-2 px-3 text-xl outline-none focus:ring-0' onClick={()=> navigate(`/Smtv/${username}/search/${input}`)}>🔍︎</button>
+            <button className='flex w-14 items-center justify-center p-2 px-3 text-xl outline-none focus:ring-0' onClick={()=> navigate(`/search/${username}/${input}`)}>🔍︎</button>
           </div>
           </div>)
           } */}
@@ -133,7 +133,7 @@ class="homebutton hidden sm:flex"
           <div class="scroll-animation flex w-screen gap-0">
 
             <div class="relative h-130 items-end sm:h-screen lg:h-[702px] w-screen flex-shrink-0"
-              onClick={() => navigate(`/Smtv/${username}/details/87140`)}
+              onClick={() => navigate(`/details/${username}/87140`)}
 
             >
               <img class="h-full w-full object-cover block" src="https://occ-0-6245-2164.1.nflxso.net/dnm/api/v6/6AYY37jfdO6hpXcMjf9Yu5cnmO0/AAAABXxsD1pl2iFLCR_wYq31-s1nCmjtG0247mfCf5wrOhTJJBCHKitOzHntERYOE76-i-omH4g2bupItBiT5RrxcyjI3G1Jqqz_Sk2S.webp?r=f5f" />
@@ -141,25 +141,25 @@ class="homebutton hidden sm:flex"
             </div>
 
             <div class="relative h-130 sm:h-screen lg:h-[702px] w-screen flex-shrink-0"
-              onClick={() => navigate(`/Smtv/${username}/details/2993`)}>
+              onClick={() => navigate(`/details/${username}/2993`)}>
               <img class="h-full w-full object-cover block" src="https://occ-0-6245-2186.1.nflxso.net/dnm/api/v6/6AYY37jfdO6hpXcMjf9Yu5cnmO0/AAAABXqhmOK-KBUzjOrk0iJ5gWgxMBnDHXjEiChZUCMhRxfsq-CBzrzlm4zjco7lRKJpuuMhL3i5mkSaZdwdjXpTgrllHr9Y1Pry8oXl.webp?r=608" />
               <div class="absolute bottom-0 left-0 w-full h-[500px] bg-gradient-to-t from-black/70 to-transparent"></div>
             </div>
 
             <div class="relative h-130 sm:h-screen lg:h-[702px] w-screen flex-shrink-0"
-              onClick={() => navigate(`/Smtv/${username}/details/50036`)}>
+              onClick={() => navigate(`/details/${username}/50036`)}>
               <img class="h-full w-full object-cover" src="https://occ-0-6245-2186.1.nflxso.net/dnm/api/v6/6AYY37jfdO6hpXcMjf9Yu5cnmO0/AAAABaudtqamvNh8KcHWf3cktNN-66448zDt6baD8201rPkhv8EOrFFUKMcgwCS6aMHeBTreNbJP0u9PJ6S6EpblQ2j5D0N0zzzGbsys.webp?r=a7e" />
               <div class="absolute bottom-0 left-0 w-full h-[500px] bg-gradient-to-t from-black/70 to-transparent"></div>
             </div>
 
             <div class="relative h-130 sm:h-screen lg:h-[702px] w-screen flex-shrink-0"
-              onClick={() => navigate(`/Smtv/${username}/details/67252`)}>
+              onClick={() => navigate(`/details/${username}/67252`)}>
               <img class="h-full w-full object-cover" src="https://m.media-amazon.com/images/S/pv-target-images/51c2c75da778c109ccc33ff293ff48f0cccc60b18c3fef8a42afe2a80e07acac._SX1920_FMwebp_.jpg" />
               <div class="absolute bottom-0 left-0 w-full h-[500px] bg-gradient-to-t from-black/70 to-transparent"></div>
             </div>
 
             <div class="relative h-130 sm:h-screen lg:h-[702px] w-screen flex-shrink-0"
-              onClick={() => navigate(`/Smtv/${username}/details/53647`)}>
+              onClick={() => navigate(`/details/${username}/53647`)}>
               <img class="h-full w-full object-cover" src="https://occ-0-6245-2186.1.nflxso.net/dnm/api/v6/6AYY37jfdO6hpXcMjf9Yu5cnmO0/AAAABTFUb7eF66eBI9-QcgF7miSIruCKoL7yuIKoyCQzj-xMqEiH-xKY_k7XqPKKH3KN3JBuTMVt01qHpKf1XlD5hVZ4SKt-Qq1XehyQ.webp?r=178" />
               <div class="absolute bottom-0 left-0 w-full h-[500px] bg-gradient-to-t from-black/70 to-transparent">
                 <img src="https://occ-0-6245-2186.1.nflxso.net/dnm/api/v6/S4oi7EPZbv2UEPaukW54OORa0S8/AAAABZyOthTbqP0lKDk4RMY_d_osHdCvHVA61Xt7-hBWI4TkHsbptPli42zFj8yRdJOHxcWwyHuHNd-xjPyKyjeUV5j30LHGsjuj.webp?r=5ff" alt="" srcSet="" />
@@ -184,9 +184,9 @@ class="homebutton hidden sm:flex"
         </div>
       </div>
 
-      <DefaultHome />
+      {/* <DefaultHome />
 
-      <Footer />
+      <Footer /> */}
     </div>
   )
 }

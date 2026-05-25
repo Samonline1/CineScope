@@ -1,494 +1,444 @@
 import React, { useEffect, useRef, useState } from "react";
-import { useDispatch } from "react-redux";
-import { addFav, deleteFav } from "../redux/featureSlice";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { toast, ToastContainer } from "react-toastify";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { IoIosHeart } from "react-icons/io";
-import { FaHeart,FaSearch } from "react-icons/fa";
-import Icon from '/src/assets/user.png'
+import { addFav, deleteFav } from "../redux/featureSlice";
+import SearchHero from "./SearchHero";
 
+const fallbackPoster =
+  "https://yt3.googleusercontent.com/Z1scaDhrH194d4AygOpJhFzM-ViGyvGLXfB5hGsNNlBRerrx98x9Knszx9-VWizx5lMZPlECOrE=s120-c-k-c0x00ffffff-no-rj";
 
+const SectionSkeletonHeading = () => (
+  <div className="flex items-center gap-3">
+    <div className="h-px flex-1 bg-red-700" />
+    <div className="h-10 w-32 rounded-xl border border-red-700 bg-white/5 animate-pulse" />
+    <div className="h-px flex-1 bg-red-700" />
+  </div>
+);
 
 const SmtvSearch = () => {
   const [search, setSearch] = useState("");
   const [movies, setMovies] = useState([]);
   const [actors, setActors] = useState([]);
   const [animes, setAnime] = useState([]);
-  const [loading, setLoading] = useState("");
-  const [empty, setEmpty] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState(false);
-  const [searchBy, setSearchBy] = useState("All");
 
-  const [LoggedUser, setLoggedUser] = useState('');
-  const { username, keyword } = useParams('');
-
-
-  const UserInfo = useSelector((state) => state.note.users);
-
-  useEffect(() => {
-    const Userdetails = UserInfo.find((U) => U?.username?.includes(username));
-    if (Userdetails) {
-      setLoggedUser(Userdetails.name);
-    }
-
-    if (keyword && keyword.trim() !== "") {
-      setSearch(keyword);
-      // initial search from URL keyword should run only once
-      // we'll trigger it immediately below (see refs added later)
-    }
-  }, [username, keyword]);
-
+  const { username, keyword } = useParams();
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const [searchParams] = useSearchParams();
 
   const movieRef = useRef(null);
   const actorRef = useRef(null);
   const animeRef = useRef(null);
-  const initialSearchTriggered = useRef(false);
-  const skipNextDebounce = useRef(false);
+  const userInfo = useSelector((state) => state.note.users);
+  const loggedInUser = userInfo.find((user) => user.username === username);
+  const favorites = loggedInUser?.favorites || [];
+  const searchType = searchParams.get("type") || "All";
+  const hasResults = movies.length > 0 || actors.length > 0 || animes.length > 0;
+  const showHeroHome = !search.trim() && !hasResults && !errorMsg;
+
+  useEffect(() => {
+    if (keyword && keyword.trim() !== "") {
+      setSearch(keyword);
+    }
+  }, [keyword]);
+
+  useEffect(() => {
+    if (!keyword || keyword.trim() === "") {
+      return;
+    }
+
+    searchMovies(keyword);
+  }, [keyword, searchType]);
 
   const scrollToSection = (sectionRef) => {
-    sectionRef.current?.scrollIntoView({ behavior: "smooth" });
+    sectionRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
   };
 
-  const navigate = useNavigate();
+  const resetResults = () => {
+    setMovies([]);
+    setActors([]);
+    setAnime([]);
+  };
 
-  const searchMovies = async () => {
-    // navigate(`/Smtv/${username}/search`);
+  const searchMovies = async (forcedSearch) => {
+    const activeSearch = (forcedSearch ?? search).trim();
 
     try {
       setLoading(true);
-      if (search.trim() === "") {
-        setMovies([]);
-        setActors([]);
-        setEmpty(true);
+      if (!activeSearch) {
+        resetResults();
         setErrorMsg(false);
-        // toast.warning("Please enter a search term");
         return;
       }
 
-      if (searchBy === "All") {
-        const URL = await fetch(
-          `https://api.tvmaze.com/search/shows?q=${search}`
-        );
-        const URLdata = await URL.json();
+      setErrorMsg(false);
 
-        const URL2 = await fetch(
-          `https://api.tvmaze.com/search/people?q=${search}`
-        );
-        const URLdata2 = await URL2.json();
-        const URL3 = await fetch(`https://api.jikan.moe/v4/anime?q=${search}`);
-        const URLdata3 = await URL3.json();
-        console.log(URLdata3.data);
+      if (searchType === "All") {
+        const showResponse = await fetch(`https://api.tvmaze.com/search/shows?q=${activeSearch}`);
+        const showData = await showResponse.json();
 
+        const actorResponse = await fetch(`https://api.tvmaze.com/search/people?q=${activeSearch}`);
+        const actorData = await actorResponse.json();
 
-        if (
-          URLdata.length > 0 ||
-          URLdata2.length > 0 ||
-          URLdata3?.data?.length > 0
-        ) {
-          setErrorMsg(false);
-          setEmpty(false);
-          setMovies(URLdata || []);
-          setActors(URLdata2 || []);
-          setAnime(URLdata3.data || []);
+        const animeResponse = await fetch(`https://api.jikan.moe/v4/anime?q=${activeSearch}`);
+        const animeData = await animeResponse.json();
+
+        if (showData.length || actorData.length || animeData?.data?.length) {
+          setMovies(showData || []);
+          setActors(actorData || []);
+          setAnime(animeData.data || []);
           toast.success("Search results loaded!", { autoClose: 1000 });
         } else {
-          setMovies([]);
-          setActors([]);
+          resetResults();
           setErrorMsg(true);
-          setEmpty(false);
-          toast.error(`No results found for "${search}"`);
+          toast.error(`No results found for "${activeSearch}"`);
         }
-      } else if (searchBy === "Content") {
+      } else if (searchType === "Content") {
+        const response = await fetch(`https://api.tvmaze.com/search/shows?q=${activeSearch}`);
+        const data = await response.json();
+        setMovies(data || []);
+        setActors([]);
+        setAnime([]);
+        setErrorMsg(!data.length);
+        if (data.length) {
+          toast.success("Content found!", { autoClose: 1000 });
+        }
+      } else if (searchType === "Actors") {
+        const response = await fetch(`https://api.tvmaze.com/search/people?q=${activeSearch}`);
+        const data = await response.json();
+        setMovies([]);
+        setActors(data || []);
+        setAnime([]);
+        setErrorMsg(!data.length);
+        if (data.length) {
+          toast.success("Actors found!", { autoClose: 1000 });
+        }
+      } else if (searchType === "Anime") {
+        const response = await fetch(`https://api.jikan.moe/v4/anime?q=${activeSearch}`);
+        const data = await response.json();
         setMovies([]);
         setActors([]);
-        let URL = await fetch(
-          `https://api.tvmaze.com/search/shows?q=${search}`
-        );
-        let URLdata = await URL.json();
-        setMovies(URLdata);
-        setErrorMsg(false);
-        toast.success("Content found!", { autoClose: 1000 });
-      } else if (searchBy === "Actors") {
-        setMovies([]);
-        setActors([]);
-        setAnime([])
-        let URL = await fetch(
-          `https://api.tvmaze.com/search/people?q=${search}`
-        );
-        let URLdata = await URL.json();
-        setActors(URLdata);
-        setErrorMsg(false);
-        toast.success("Actors found!", { autoClose: 1000 });
-      } else if (searchBy === "Anime") {
-        setMovies([]);
-        setActors([]);
-        let URL = await fetch(`https://api.jikan.moe/v4/anime?q=${search}`);
-        let URLdata = await URL.json();
-        setAnime(URLdata.data || []);
-        setErrorMsg(false);
-        toast.success("Anime found!", { autoClose: 1000 });
-        console.log(URLdata);
+        setAnime(data.data || []);
+        setErrorMsg(!data?.data?.length);
+        if (data?.data?.length) {
+          toast.success("Anime found!", { autoClose: 1000 });
+        }
       }
     } catch (error) {
-      console.log("not found");
       toast.error("Failed to fetch search results. Please try again.");
     } finally {
       setLoading(false);
     }
   };
 
-  // nav is redering on details page from details page
-  // again search should redirect to main page with results and redirect to details if clicked : on every search navigate to main page ?
-
-  const MovieDetails = (MovieId) => {
-    navigate(`/Smtv/${username}/details/${MovieId}`);
-    setMovies([]);
-    setActors([]);
-    setAnime([]);
+  const openMovieDetails = (movieId) => {
+    navigate(`/details/${username}/${movieId}`);
+    resetResults();
   };
 
-  const actorDetails = (actorId) => {
-    navigate(`/Actor/${username}/${actorId}`)
-    setMovies([]);
-    setActors([]);
-    setAnime([]);
+  const openActorDetails = (actorId) => {
+    navigate(`/actor/${username}/${actorId}`);
+    resetResults();
   };
 
+  const openAnimeDetails = (animeId) => {
+    navigate(`/anime/${username}/${animeId}`);
+    resetResults();
+  };
 
-  const AnimeDetails = (id) => {
-    navigate(`/Smtv/${username}/anime/${id}`)
-    // https://api.jikan.moe/v4/anime/9409
-    setMovies([]);
-    setActors([]);
-    setAnime([]);
-  }
+  const setFavorite = (favoriteId) => {
+    const existingFavorite = favorites.findIndex((item) => item.id === favoriteId);
 
-  function formatTime(theDate) {
-    const date = new Date(theDate);
-    return date.toLocaleDateString("en-GB", {
-      // day: "numeric",
-      // month: "short",
-      year: "numeric",
-    });
-  }
-
-  const dispatch = useDispatch('');
-  const favList = useSelector((state) => state.note.users);
-
-  const loggedInUser = favList.find((u) => u.username === username);
-  const favorites = loggedInUser?.favorites || [];
-
-
-
-
-  function setFavorite(fav) {
-    const favo = fav;
-    const filterList = favorites.findIndex((i) => i.id === fav);
-    console.log("1");
-
-    if (filterList >= 0) {
-      dispatch(deleteFav({ username: username, favId: fav }));
+    if (existingFavorite >= 0) {
+      dispatch(deleteFav({ username, favId: favoriteId }));
       toast.info("Removed from favorites", { autoClose: 1000 });
-      console.log("3");
-    } else {
-      console.log("2");
-      const favsearch = async () => {
-        try {
-          const fav = await fetch(`https://api.tvmaze.com/shows/${favo}`);
-          const favData = await fav.json();
-          console.log(favData.premiered);
-          const favList = {
-            id: favData.id,
-            name: favData.name,
-            img: favData.image?.medium,
-            type: favData.type,
-            genres: favData.genres.join(", "),
-            rating: favData.rating?.average || "N/A",
-            year: favData.premiered
-          };
-
-          console.log(favList.rating);
-          
-          dispatch(addFav({ username: username, favorite: favList }));
-          toast.success("Added to favorites!", { autoClose: 1000 });
-        } catch (error) {
-          toast.error("Failed to add to favorites");
-        }
-      };
-      favsearch();
+      return;
     }
-  }
 
-  if (loading) return <p className="flex justify-center items-center w-screen h-screen bg-black">
-    <div className="shine-btn">
-            <img className="h-20 lg:h-[55px] lg:hidden" src="https://upload.wikimedia.org/wikipedia/commons/1/18/Netflix_2016_N_logo.svg" alt="" srcset="" />
-             <svg
-              className="h-7 lg:h-[35px] hidden lg:block"
-              viewBox="0 0 111 30"
-              height={"25px"}
-              data-uia="netflix-logo"
-              aria-hidden="true"
-              focusable="false"
-              fill="rgb(229,9,20)"
-            >
-              <g id="netflix-logo">
-                <path
-                  d="M105.06233,14.2806261 L110.999156,30 C109.249227,29.7497422 107.500234,29.4366857 105.718437,29.1554972 L102.374168,20.4686475 L98.9371075,28.4375293 C97.2499766,28.1563408 95.5928391,28.061674 93.9057081,27.8432843 L99.9372012,14.0931671 L94.4680851,-5.68434189e-14 L99.5313525,-5.68434189e-14 L102.593495,7.87421502 L105.874965,-5.68434189e-14 L110.999156,-5.68434189e-14 L105.06233,14.2806261 Z M90.4686475,-5.68434189e-14 L85.8749649,-5.68434189e-14 L85.8749649,27.2499766 C87.3746368,27.3437061 88.9371075,27.4055675 90.4686475,27.5930265 L90.4686475,-5.68434189e-14 Z M81.9055207,26.93692 C77.7186241,26.6557316 73.5307901,26.4064111 69.250164,26.3117443 L69.250164,-5.68434189e-14 L73.9366389,-5.68434189e-14 L73.9366389,21.8745899 C76.6248008,21.9373887 79.3120255,22.1557784 81.9055207,22.2804387 L81.9055207,26.93692 Z M64.2496954,10.6561065 L64.2496954,15.3435186 L57.8442216,15.3435186 L57.8442216,25.9996251 L53.2186709,25.9996251 L53.2186709,-5.68434189e-14 L66.3436123,-5.68434189e-14 L66.3436123,4.68741213 L57.8442216,4.68741213 L57.8442216,10.6561065 L64.2496954,10.6561065 Z M45.3435186,4.68741213 L45.3435186,26.2498828 C43.7810479,26.2498828 42.1876465,26.2498828 40.6561065,26.3117443 L40.6561065,4.68741213 L35.8121661,4.68741213 L35.8121661,-5.68434189e-14 L50.2183897,-5.68434189e-14 L50.2183897,4.68741213 L45.3435186,4.68741213 Z M30.749836,15.5928391 C28.687787,15.5928391 26.2498828,15.5928391 24.4999531,15.6875059 L24.4999531,22.6562939 C27.2499766,22.4678976 30,22.2495079 32.7809542,22.1557784 L32.7809542,26.6557316 L19.812541,27.6876933 L19.812541,-5.68434189e-14 L32.7809542,-5.68434189e-14 L32.7809542,4.68741213 L24.4999531,4.68741213 L24.4999531,10.9991564 C26.3126816,10.9991564 29.0936358,10.9054269 30.749836,10.9054269 L30.749836,15.5928391 Z M4.78114163,12.9684132 L4.78114163,29.3429562 C3.09401069,29.5313525 1.59340144,29.7497422 0,30 L0,-5.68434189e-14 L4.4690224,-5.68434189e-14 L10.562377,17.0315868 L10.562377,-5.68434189e-14 L15.2497891,-5.68434189e-14 L15.2497891,28.061674 C13.5935889,28.3437998 11.906458,28.4375293 10.1246602,28.6868498 L4.78114163,12.9684132 Z"
-                  id="Fill-14"
-                ></path>
-              </g>
-            </svg>
+    const addFavorite = async () => {
+      try {
+        const favoriteResponse = await fetch(`https://api.tvmaze.com/shows/${favoriteId}`);
+        const favoriteData = await favoriteResponse.json();
+
+        const favoriteItem = {
+          id: favoriteData.id,
+          name: favoriteData.name,
+          img: favoriteData.image?.medium,
+          type: favoriteData.type,
+          genres: favoriteData.genres.join(", "),
+          rating: favoriteData.rating?.average || "N/A",
+          year: favoriteData.premiered,
+        };
+
+        dispatch(addFav({ username, favorite: favoriteItem }));
+        toast.success("Added to favorites!", { autoClose: 1000 });
+      } catch (error) {
+        toast.error("Failed to add to favorites");
+      }
+    };
+
+    addFavorite();
+  };
+
+  if (loading) {
+    return (
+      <div className="w-full bg-black text-white">
+        <div className="sticky top-[-5px] border-y border-white/10 bg-black/80 px-4 py-3 backdrop-blur-md">
+          <div className="flex items-center justify-center gap-4 text-sm text-gray-500 sm:gap-8">
+            <div className="h-4 w-16 animate-pulse rounded bg-white/10" />
+            <div className="h-4 w-14 animate-pulse rounded bg-white/10" />
+            <div className="h-4 w-14 animate-pulse rounded bg-white/10" />
           </div>
-  </p>; // if true not the default value
-  if (movies.length < 0) return <p>not 2 Found...</p>;
-
-  return (
-    <>
-      <div className="relative w-full bg-black text-white overflow-hidden">
-        <ToastContainer position="top-right" />
-        
-                  <div className="flex items-center lg:justify-between justify-center lg:w-full w-full lg:mt-5 z-10  flex h-20 bg-black/2 lg:py-10 py-10 mt-2 px-5 lg:px-20 ">
-
-          <div onClick={() => navigate(`/Smtv/${username}`)}>
-            <img className="h-18 lg:h-[55px] lg:hidden" src="https://upload.wikimedia.org/wikipedia/commons/1/18/Netflix_2016_N_logo.svg" alt="" srcset="" />
-             <svg
-              className="h-7 lg:h-[35px] hidden lg:block"
-              viewBox="0 0 111 30"
-              height={"25px"}
-              data-uia="netflix-logo"
-              aria-hidden="true"
-              focusable="false"
-              fill="rgb(229,9,20)"
-            >
-              <g id="netflix-logo">
-                <path
-                  d="M105.06233,14.2806261 L110.999156,30 C109.249227,29.7497422 107.500234,29.4366857 105.718437,29.1554972 L102.374168,20.4686475 L98.9371075,28.4375293 C97.2499766,28.1563408 95.5928391,28.061674 93.9057081,27.8432843 L99.9372012,14.0931671 L94.4680851,-5.68434189e-14 L99.5313525,-5.68434189e-14 L102.593495,7.87421502 L105.874965,-5.68434189e-14 L110.999156,-5.68434189e-14 L105.06233,14.2806261 Z M90.4686475,-5.68434189e-14 L85.8749649,-5.68434189e-14 L85.8749649,27.2499766 C87.3746368,27.3437061 88.9371075,27.4055675 90.4686475,27.5930265 L90.4686475,-5.68434189e-14 Z M81.9055207,26.93692 C77.7186241,26.6557316 73.5307901,26.4064111 69.250164,26.3117443 L69.250164,-5.68434189e-14 L73.9366389,-5.68434189e-14 L73.9366389,21.8745899 C76.6248008,21.9373887 79.3120255,22.1557784 81.9055207,22.2804387 L81.9055207,26.93692 Z M64.2496954,10.6561065 L64.2496954,15.3435186 L57.8442216,15.3435186 L57.8442216,25.9996251 L53.2186709,25.9996251 L53.2186709,-5.68434189e-14 L66.3436123,-5.68434189e-14 L66.3436123,4.68741213 L57.8442216,4.68741213 L57.8442216,10.6561065 L64.2496954,10.6561065 Z M45.3435186,4.68741213 L45.3435186,26.2498828 C43.7810479,26.2498828 42.1876465,26.2498828 40.6561065,26.3117443 L40.6561065,4.68741213 L35.8121661,4.68741213 L35.8121661,-5.68434189e-14 L50.2183897,-5.68434189e-14 L50.2183897,4.68741213 L45.3435186,4.68741213 Z M30.749836,15.5928391 C28.687787,15.5928391 26.2498828,15.5928391 24.4999531,15.6875059 L24.4999531,22.6562939 C27.2499766,22.4678976 30,22.2495079 32.7809542,22.1557784 L32.7809542,26.6557316 L19.812541,27.6876933 L19.812541,-5.68434189e-14 L32.7809542,-5.68434189e-14 L32.7809542,4.68741213 L24.4999531,4.68741213 L24.4999531,10.9991564 C26.3126816,10.9991564 29.0936358,10.9054269 30.749836,10.9054269 L30.749836,15.5928391 Z M4.78114163,12.9684132 L4.78114163,29.3429562 C3.09401069,29.5313525 1.59340144,29.7497422 0,30 L0,-5.68434189e-14 L4.4690224,-5.68434189e-14 L10.562377,17.0315868 L10.562377,-5.68434189e-14 L15.2497891,-5.68434189e-14 L15.2497891,28.061674 C13.5935889,28.3437998 11.906458,28.4375293 10.1246602,28.6868498 L4.78114163,12.9684132 Z"
-                  id="Fill-14"
-                ></path>
-              </g>
-            </svg>
-          </div>
-          <div className="flex w-full lg:w-[50%] mx-9 justify-center items-center gap-2 border border-[0.5px] border-gray-900 rounded-xl">
-            <select className="w-4 mx-2 sm:mx-2"
-              id="filter"
-              value={searchBy}
-              onChange={(e) => setSearchBy(e.target.value)}
-            >
-              <option value="All">All</option>
-              <option value="Content">Content</option>
-              <option value="Actors">Actors</option>
-              <option value="Anime">Anime</option>
-            </select>
-            <input
-              className="w-full py-2 border-gray-900 outline-none focus:ring-0"
-
-              type="text"
-              placeholder="Search..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-            />
-            <p className="flex w-20 items-center justify-center p-2  text-lg rounded-3xl text-white            "
-              onClick={searchMovies}><FaSearch/></p>
-          </div>
-            <div className="flex items-center lg:w-[10%] w-[40%] gap-5">
-              <p className="text-xl" onClick={() => navigate(`/Smtv/${username}/favorite`)}
-              ><FaHeart />
-
-</p>
-              <div className='flex justify-center ml-2 gap-2 items-center'
-                              onClick={() => navigate(`/Smtv/profile/${username}`)}
-
->
-                <p className="hidden sm:flex font-bold" 
-                >Hello,{LoggedUser}</p>
-                <img className='h-8 w-8 rounded-[50%] bg-red-800' src={Icon} alt="" />
-
-              </div>            
-            </div>
-          
         </div>
 
-        <div className="flex justify-center items-center  sticky z-50 top-0 morph-blob opacity-80 w-screen  ">
-          {movies.length > 0 && actors.length > 0 && animes.length > 0 && (
-            <div className=" flex w-[50%] justify-center items-center gap-7 lg:gap-20 p-5 ">
-              <p onClick={() => scrollToSection(movieRef)}>Movies</p> |
-              <p onClick={() => scrollToSection(animeRef)}>Anime</p> |
-              <p onClick={() => scrollToSection(actorRef)}>Actors</p>
-            </div>
+        <section className="mx-auto mt-5 w-full max-w-7xl px-4 sm:px-5 lg:px-8">
+          {(searchType === "All" || searchType === "Content") && (
+            <>
+              <SectionSkeletonHeading />
+              <div className="mt-8 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5 lg:gap-5">
+                {Array.from({ length: 10 }).map((_, index) => (
+                  <div key={`movie-skeleton-${index}`} className="flex flex-col overflow-hidden">
+                    <div className="h-60 cursor-pointer rounded-xl bg-white/8 animate-pulse sm:h-72 lg:h-80" />
+
+                    <div className="mt-3 flex flex-col gap-2">
+                      <div className="h-5 w-4/5 rounded bg-white/10 animate-pulse" />
+                      <div className="flex items-center justify-between gap-3 text-sm text-gray-400">
+                        <div className="h-4 w-14 rounded bg-white/10 animate-pulse" />
+                        <div className="h-4 w-16 rounded bg-white/10 animate-pulse" />
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </>
           )}
-        </div>
 
+          {(searchType === "All" || searchType === "Anime") && (
+            <div className={searchType === "All" ? "mt-16" : ""}>
+              <SectionSkeletonHeading />
+              <div className="mt-8 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5 lg:gap-5">
+                {Array.from({ length: 10 }).map((_, index) => (
+                  <div key={`anime-skeleton-${index}`} className="flex flex-col overflow-hidden">
+                    <div className="h-60 rounded-xl bg-white/8 animate-pulse sm:h-72 lg:h-80" />
 
-        {movies && movies.length > 0 ? (
-          // main container full of grids
-
-          <div className="mt-10">
-            <div className="flex items-center w-full bg-red-700 h-1">
-              <p className=" flex items-center ml-10 lg:ml-30 text-2xl bg-black px-5 py-[2px] border-2 border-red-700 rounded-xl font-bold"> Movies </p>
-            </div>
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 relative h-full w-screen mt-10 px-5 sm:px-5 lg:px-30 gap-2 sm:gap-3 lg:gap-5">
-              {movies.map((movie) => (
-                <div
-                  key={movie.show?.id}
-                  className=" relative flex flex-col w-full h-full p-1 sm:p-2 overflow-hidden "
-                >
-                  <div className="w-full h-60 sm:h-60 lg:h-80 cursor-pointer">
-                    <img
-                      onClick={() => MovieDetails(movie.show.id)}
-                      className="rounded object-cover bg-red-600 w-full h-full"
-                      src={
-                        movie.show?.image
-                          ? movie.show?.image?.medium
-                          : "https://yt3.googleusercontent.com/Z1scaDhrH194d4AygOpJhFzM-ViGyvGLXfB5hGsNNlBRerrx98x9Knszx9-VWizx5lMZPlECOrE=s120-c-k-c0x00ffffff-no-rj"
-                      }
-                      alt=""
-                    />
-                  </div>
-                  <div className="relative flex flex-col py-2 mt-2 h-full">
-                    <b>
-                      <p className="">{movie.show?.name} </p>
-                    </b>
-                    <div className="flex justify-between gap-2 mt-2 text-gray-500">
-                      <div>
-                        <p>{movie.show?.premiered ? new Date(movie.show.premiered).getFullYear() : "N/A"}</p>
-                      </div>
-
-                      <div className="flex gap-4">
-                        <p>{movie.show.rating?.average || "N/A"} ⭐</p>
-
-                        <p
-                          key={movie.show?.id}
-                          className={
-                            favorites.some((f) => f.id === movie.show?.id)
-                              ? "text-xl flex items-center"
-                              : "  text-[30px] py-0 px-2 flex items-center justify-center h-5 w-5"
-                          }
-                          onClick={(e) => { e.stopPropagation(); setFavorite(movie.show?.id); }}
-                        >
-                          {favorites.some((f) => f.id === movie.show?.id)
-                            ? <IoIosHeart />
-                            : "♡"}
-                        </p>
+                    <div className="mt-3 flex flex-col gap-2">
+                      <div className="h-5 w-4/5 rounded bg-white/10 animate-pulse" />
+                      <div className="flex items-center justify-between gap-3 text-sm text-gray-400">
+                        <div className="h-4 w-14 rounded bg-white/10 animate-pulse" />
+                        <div className="h-4 w-16 rounded bg-white/10 animate-pulse" />
                       </div>
                     </div>
                   </div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-        ) : (
-          ""
-          // <p className="flex justify-center items-center w-screen h-30 bg-black"> {empty === true && "paaji kuch likho toh empty hai"}  </p>
-        )}
-
-        {animes && animes.length > 0 ? (
-
-          <div className="mt-20">
-            <div className="flex items-center w-full bg-red-700 h-1">
-              <p className=" flex items-center ml-10 lg:ml-30 text-2xl bg-black px-5 py-[2px] border-2 border-red-700 rounded-xl font-bold"> Anime </p>
-            </div>
-            <div >
-              <div ref={animeRef} className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 relative h-full w-screen mt-10 px-5 sm:px-5 lg:px-30 gap-2 sm:gap-3 lg:gap-5">
-                {animes.map((anime) => (
-
-                  <div key={anime.mal_id}
-                    onClick={() => AnimeDetails(anime.mal_id)}
-                    className=" relative flex flex-col w-full h-full p-1 sm:p-2 overflow-hidden"
-                  >
-                    <div className="w-full h-60 sm:h-60 lg:h-80">
-                      <img className="relative rounded object-cover w-full h-60 lg:h-60"
-                        src={anime.images?.jpg?.image_url || "https://yt3.googleusercontent.com/Z1scaDhrH194d4AygOpJhFzM-ViGyvGLXfB5hGsNNlBRerrx98x9Knszx9-VWizx5lMZPlECOrE=s120-c-k-c0x00ffffff-no-rj"
-                        } alt="" srcSet="" />
-                    </div>
-
-                    <div className="relative flex flex-col py-2 mt-2 h-full">
-                      <b>
-                        <p className="">{anime?.title} </p>
-                      </b>
-                      <div className="flex  justify-between gap-2 mt-2 text-gray-500">
-                        <div>
-                          <p>{anime.aired?.from ? new Date(anime.aired.from).getFullYear() : "N/A"}</p>
-                        </div>
-
-                        <div className="flex gap-4">
-                          <p>{anime.score || "N/A"} ⭐</p>
-
-                          <p
-                            key={anime.mal_id}
-                            className={
-                              favorites.some((f) => f.id === anime.mal_id)
-                                ? "text-xl px-2 flex items-center w-5"
-                                : "  text-[30px] py-0 px-2 flex items-center justify-center h-5 w-5"
-                            }
-                            onClick={(e) => { e.stopPropagation(); setFavorite(anime.mal_id); }}
-                          >
-                            {favorites.some((f) => f.id === anime.mal_id)
-                              ? "❤"
-                              : "♡"}
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-
                 ))}
               </div>
             </div>
-          </div>
+          )}
 
-        ) : null}
+          {(searchType === "All" || searchType === "Actors") && (
+            <div className={searchType === "All" ? "mt-16" : ""}>
+              <SectionSkeletonHeading />
+              <div className="mt-8 grid gap-4 lg:grid-cols-3">
+                {Array.from({ length: 6 }).map((_, index) => (
+                  <div
+                    key={`actor-skeleton-${index}`}
+                    className="flex gap-4 rounded-2xl border border-red-700/50 bg-white/[0.03] p-3"
+                  >
+                    <div className="h-28 w-24 shrink-0 overflow-hidden rounded-xl bg-white/8 animate-pulse sm:h-32 sm:w-28" />
 
-        {actors && actors.length > 0 ? (
-          <div className="mt-20 h-full">
-            <div className="flex items-center w-full bg-red-700 h-1">
-              <p className=" flex items-center ml-10 lg:ml-30 text-2xl bg-black px-5 py-[2px] border-2 border-red-700 rounded-xl font-bold"> Actors </p>
-            </div>
-            <div
-              ref={actorRef}
-              className="lg:grid grid-cols-2 relative h-full w-screen mt-15 px-10 lg:px-30 gap-5 space-y-5 lg:space-y-0 "
-
-            >
-              {actors.map(
-                (
-                  actor // No sense of using map cause you can only with exact name that return only one array? - make selct dropdown specific
-                ) => (
-
-                  <div key={actor.person?.id}
-                    onClick={() => actorDetails(actor.person?.id)}
-                    className="flex border border-red-700 w-full h-30  p-3 rounded-xl">
-
-                    <div className="flex relative h-full w-23 items-center justify-center">
-                      <img className=" object-cover object-top w-full h-full  rounded-xl h-full"
-                        src={actor.person?.image?.medium || "https://yt3.googleusercontent.com/Z1scaDhrH194d4AygOpJhFzM-ViGyvGLXfB5hGsNNlBRerrx98x9Knszx9-VWizx5lMZPlECOrE=s120-c-k-c0x00ffffff-no-rj"} alt="" />
-                    </div>
-                    <div className="px-3 h-full" key={actor.person?.id}>
-                      <p className=" text-2xl font-bold">{actor.person?.name}</p>
-                      <div className="flex space-x-2"><p>{actor.person?.gender}</p>
-                        <p>{actor.person?.birthday || "N/A"}</p>
+                    <div className="flex flex-col justify-center">
+                      <div className="h-6 w-32 rounded bg-white/10 animate-pulse sm:h-7 sm:w-40" />
+                      <div className="mt-2 flex flex-wrap gap-x-3 gap-y-1">
+                        <div className="h-4 w-16 rounded bg-white/10 animate-pulse" />
+                        <div className="h-4 w-20 rounded bg-white/10 animate-pulse" />
                       </div>
-                      {/* <p>{actor.person?.country || "Country not found "}</p> */}
-
                     </div>
-
                   </div>
-
-                )
-              )}
+                ))}
+              </div>
             </div>
-          </div>
-        ) : null}
-
-        {/* {movies.length < 0 && <p>no beta</p>} */}
-        {errorMsg === true && <p>{search} is not found</p>}
+          )}
+        </section>
       </div>
+    );
+  }
 
+  return (
+    <div className="relative w-full overflow-hidden bg-black text-white">
+      <ToastContainer position="top-right" />
 
-    </>
+      {hasResults && (
+        <div className="sticky top-[-5px] border-y border-white/10 bg-black/80 px-4 py-3 backdrop-blur-md">
+          <div className=" flex max-w-5xl items-center justify-center gap-4 text-sm text-gray-300 sm:gap-8">
+            {movies.length > 0 && <button onClick={() => scrollToSection(movieRef)}>Movies</button>}
+            {animes.length > 0 && <button onClick={() => scrollToSection(animeRef)}>Anime</button>}
+            {actors.length > 0 && <button onClick={() => scrollToSection(actorRef)}>Actors</button>}
+          </div>
+        </div>
+      )}
+
+      {showHeroHome && <SearchHero onOpenDetails={openMovieDetails} />}
+
+      
+
+      {movies.length > 0 && (
+        <section ref={movieRef} className="mx-auto w-full mt-5 max-w-7xl px-4 sm:px-5 lg:px-8">
+          <div className="flex items-center gap-3">
+            <div className="h-px flex-1 bg-red-700" />
+            <p className="rounded-xl border border-red-700 bg-black px-4 py-1 text-lg font-bold sm:text-2xl">
+              Movies
+            </p>
+            <div className="h-px flex-1 bg-red-700" />
+          </div>
+
+          <div className="mt-8 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5 lg:gap-5">
+            {movies.map((movie) => (
+              <div key={movie.show?.id} className="flex flex-col overflow-hidden">
+                <div className="h-60 cursor-pointer sm:h-72 lg:h-80">
+                  <img
+                    onClick={() => openMovieDetails(movie.show?.id)}
+                    className="h-full w-full rounded-xl object-cover"
+                    src={movie.show?.image?.medium || fallbackPoster}
+                    alt={movie.show?.name || "Movie"}
+                    loading="lazy"
+                  />
+                </div>
+
+                <div className="mt-3 flex flex-col gap-2">
+                  <p className="font-semibold">{movie.show?.name}</p>
+                  <div className="flex items-center justify-between gap-3 text-sm text-gray-400">
+                    <p>{movie.show?.premiered ? new Date(movie.show.premiered).getFullYear() : "N/A"}</p>
+                    <div className="flex items-center gap-3">
+                      <p>{movie.show?.rating?.average || "N/A"} star</p>
+                      <button
+                        type="button"
+                        className={favorites.some((item) => item.id === movie.show?.id) ? "text-xl text-red-500" : "text-2xl"}
+                        onClick={(event) => {
+                          event.stopPropagation();
+                          setFavorite(movie.show?.id);
+                        }}
+                      >
+                        {favorites.some((item) => item.id === movie.show?.id) ? <IoIosHeart /> : "♡"}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {animes.length > 0 && (
+        <section ref={animeRef} className="mx-auto mt-16 w-full max-w-7xl px-4 sm:px-5 lg:px-8">
+          <div className="flex items-center gap-3">
+            <div className="h-px flex-1 bg-red-700" />
+            <p className="rounded-xl border border-red-700 bg-black px-4 py-1 text-lg font-bold sm:text-2xl">
+              Anime
+            </p>
+            <div className="h-px flex-1 bg-red-700" />
+          </div>
+
+          <div className="mt-8 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5 lg:gap-5">
+            {animes.map((anime) => (
+              <div
+                key={anime.mal_id}
+                onClick={() => openAnimeDetails(anime.mal_id)}
+                className="flex cursor-pointer flex-col overflow-hidden"
+              >
+                <div className="h-60 sm:h-72 lg:h-80">
+                  <img
+                    className="h-full w-full rounded-xl object-cover"
+                    src={anime.images?.jpg?.image_url || fallbackPoster}
+                    alt={anime.title || "Anime"}
+                    loading="lazy"
+                  />
+                </div>
+
+                <div className="mt-3 flex flex-col gap-2">
+                  <p className="font-semibold">{anime.title}</p>
+                  <div className="flex items-center justify-between gap-3 text-sm text-gray-400">
+                    <p>{anime.aired?.from ? new Date(anime.aired.from).getFullYear() : "N/A"}</p>
+                    <div className="flex items-center gap-3">
+                      <p>{anime.score || "N/A"} star</p>
+                      <button
+                        type="button"
+                        className={favorites.some((item) => item.id === anime.mal_id) ? "text-xl text-red-500" : "text-2xl"}
+                        onClick={(event) => {
+                          event.stopPropagation();
+                          setFavorite(anime.mal_id);
+                        }}
+                      >
+                        {favorites.some((item) => item.id === anime.mal_id) ? <IoIosHeart /> : "♡"}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {actors.length > 0 && (
+        <section ref={actorRef} className="mx-auto mt-16 w-full max-w-7xl px-4 pb-10 sm:px-5 lg:px-8">
+          <div className="flex items-center gap-3">
+            <div className="h-px flex-1 bg-red-700" />
+            <p className="rounded-xl border border-red-700 bg-black px-4 py-1 text-lg font-bold sm:text-2xl">
+              Actors
+            </p>
+            <div className="h-px flex-1 bg-red-700" />
+          </div>
+
+          <div className="mt-8 grid gap-4 lg:grid-cols-3">
+            {actors.map((actor) => (
+              <div
+                key={actor.person?.id}
+                onClick={() => openActorDetails(actor.person?.id)}
+                className="flex cursor-pointer gap-4 rounded-2xl border border-red-700/50 bg-white/[0.03] p-3"
+              >
+                <div className="h-28 w-24 shrink-0 overflow-hidden rounded-xl sm:h-32 sm:w-28">
+                  <img
+                    className="h-full w-full object-cover object-top"
+                    src={actor.person?.image?.medium || fallbackPoster}
+                    alt={actor.person?.name || "Actor"}
+                    loading="lazy"
+                  />
+                </div>
+
+                <div className="flex flex-col justify-center">
+                  <p className="text-xl font-bold sm:text-2xl">{actor.person?.name}</p>
+                  <div className="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-sm text-gray-400 sm:text-base">
+                    <p>{actor.person?.gender || "N/A"}</p>
+                    <p>{actor.person?.birthday || "N/A"}</p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {errorMsg && !hasResults && (
+        <div className="mx-auto flex w-full max-w-xl flex-col items-center px-4 pb-14 pt-10 text-center">
+          <div className="w-full rounded-2xl border border-white/10 bg-white/[0.03] px-6 py-8 shadow-[0_10px_30px_rgba(0,0,0,0.2)]">
+            <p className="text-xs font-semibold uppercase tracking-[0.24em] text-red-500">
+              No Match
+            </p>
+            <h3 className="mt-3 text-xl font-bold text-white sm:text-2xl">
+              Nothing found for "{search}"
+            </h3>
+            <p className="mt-2 text-sm text-gray-400 sm:text-base">
+              Try another title, change the type, or search with fewer words.
+            </p>
+          </div>
+        </div>
+      )}
+    </div>
   );
 };
 
 export default SmtvSearch;
-

@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom';
 import Footer from './footer';
-import SearchNav from './SearchNav';
 import { toast, ToastContainer } from 'react-toastify';
 
 
@@ -10,7 +9,7 @@ const Actor = () => {
 
   const [actor, setActor] = useState();
 
-  const { id } = useParams();
+  const { id, username } = useParams();
   console.log(id);
   
   const navigate = useNavigate();
@@ -70,27 +69,50 @@ const Actor = () => {
 
   }, [id])
 
-  if (!actor) return <p className="flex justify-center items-center w-screen h-screen bg-black">
-    <div className="shine-btn">
-                <img className="h-20 lg:h-[55px] lg:hidden" src="https://upload.wikimedia.org/wikipedia/commons/1/18/Netflix_2016_N_logo.svg" alt="" srcset="" />
-                 <svg
-                  className="h-7 lg:h-[35px] hidden lg:block"
-                  viewBox="0 0 111 30"
-                  height={"25px"}
-                  data-uia="netflix-logo"
-                  aria-hidden="true"
-                  focusable="false"
-                  fill="rgb(229,9,20)"
-                >
-                  <g id="netflix-logo">
-                    <path
-                      d="M105.06233,14.2806261 L110.999156,30 C109.249227,29.7497422 107.500234,29.4366857 105.718437,29.1554972 L102.374168,20.4686475 L98.9371075,28.4375293 C97.2499766,28.1563408 95.5928391,28.061674 93.9057081,27.8432843 L99.9372012,14.0931671 L94.4680851,-5.68434189e-14 L99.5313525,-5.68434189e-14 L102.593495,7.87421502 L105.874965,-5.68434189e-14 L110.999156,-5.68434189e-14 L105.06233,14.2806261 Z M90.4686475,-5.68434189e-14 L85.8749649,-5.68434189e-14 L85.8749649,27.2499766 C87.3746368,27.3437061 88.9371075,27.4055675 90.4686475,27.5930265 L90.4686475,-5.68434189e-14 Z M81.9055207,26.93692 C77.7186241,26.6557316 73.5307901,26.4064111 69.250164,26.3117443 L69.250164,-5.68434189e-14 L73.9366389,-5.68434189e-14 L73.9366389,21.8745899 C76.6248008,21.9373887 79.3120255,22.1557784 81.9055207,22.2804387 L81.9055207,26.93692 Z M64.2496954,10.6561065 L64.2496954,15.3435186 L57.8442216,15.3435186 L57.8442216,25.9996251 L53.2186709,25.9996251 L53.2186709,-5.68434189e-14 L66.3436123,-5.68434189e-14 L66.3436123,4.68741213 L57.8442216,4.68741213 L57.8442216,10.6561065 L64.2496954,10.6561065 Z M45.3435186,4.68741213 L45.3435186,26.2498828 C43.7810479,26.2498828 42.1876465,26.2498828 40.6561065,26.3117443 L40.6561065,4.68741213 L35.8121661,4.68741213 L35.8121661,-5.68434189e-14 L50.2183897,-5.68434189e-14 L50.2183897,4.68741213 L45.3435186,4.68741213 Z M30.749836,15.5928391 C28.687787,15.5928391 26.2498828,15.5928391 24.4999531,15.6875059 L24.4999531,22.6562939 C27.2499766,22.4678976 30,22.2495079 32.7809542,22.1557784 L32.7809542,26.6557316 L19.812541,27.6876933 L19.812541,-5.68434189e-14 L32.7809542,-5.68434189e-14 L32.7809542,4.68741213 L24.4999531,4.68741213 L24.4999531,10.9991564 C26.3126816,10.9991564 29.0936358,10.9054269 30.749836,10.9054269 L30.749836,15.5928391 Z M4.78114163,12.9684132 L4.78114163,29.3429562 C3.09401069,29.5313525 1.59340144,29.7497422 0,30 L0,-5.68434189e-14 L4.4690224,-5.68434189e-14 L10.562377,17.0315868 L10.562377,-5.68434189e-14 L15.2497891,-5.68434189e-14 L15.2497891,28.061674 C13.5935889,28.3437998 11.906458,28.4375293 10.1246602,28.6868498 L4.78114163,12.9684132 Z"
-                      id="Fill-14"
-                    ></path>
-                  </g>
-                </svg>
-              </div>
-  </p>
+  if (!actor) return (
+    <div className="relative min-h-screen w-full overflow-hidden bg-black text-white">
+      <div className="flex flex-col px-5 py-8 lg:gap-10 lg:px-20 lg:py-12">
+        <div className="flex h-full w-full rounded-xl pt-10 lg:h-90">
+          <div className="h-60 w-70 rounded-xl bg-white/8 animate-pulse lg:h-full lg:w-60" />
+          <div className="flex w-full flex-col justify-end gap-3 p-5">
+            <div className="h-10 w-48 rounded bg-white/10 animate-pulse lg:h-20 lg:w-96" />
+            <div className="h-6 w-32 rounded bg-white/10 animate-pulse lg:h-8 lg:w-48" />
+            <div className="h-6 w-24 rounded bg-white/10 animate-pulse lg:h-8 lg:w-36" />
+          </div>
+        </div>
+      </div>
+
+      <div className="flex flex-col gap-5 px-10 py-10 lg:px-20">
+        <div className="flex h-15 w-full items-center">
+          <div className="h-15 w-2 bg-red-700" />
+          <div className="ml-5 h-8 w-28 rounded bg-white/10 animate-pulse" />
+        </div>
+
+        <div className="space-y-3">
+          {Array.from({ length: 4 }).map((_, index) => (
+            <div
+              key={`actor-overview-skeleton-${index}`}
+              className="h-7 rounded bg-white/10 animate-pulse"
+              style={{ width: index % 2 === 0 ? "14rem" : "12rem" }}
+            />
+          ))}
+        </div>
+      </div>
+
+      <div className="flex h-full w-full justify-center gap-5 px-10 py-10 lg:px-20">
+        <div className="flex w-full gap-5 overflow-hidden">
+          {Array.from({ length: 5 }).map((_, index) => (
+            <div key={`similar-actor-skeleton-${index}`} className="w-50 shrink-0 lg:w-60">
+              <div className="h-60 w-40 rounded-xl bg-white/8 animate-pulse lg:h-80 lg:w-60" />
+              <div className="mt-3 h-5 w-28 rounded bg-white/10 animate-pulse" />
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <Footer />
+    </div>
+  )
 
   // Only log if similiar exists and has at least one item
   if (actor?.similiar && Array.isArray(actor.similiar) && actor.similiar.length > 0 && actor.similiar[0]?.person?.name) {
@@ -101,9 +123,7 @@ const Actor = () => {
     <div className='relative h-full w-screen bg-black'>
       <ToastContainer position="top-right" />
 
-      <div className='flex flex-col px-10 lg:px-20 py-20 lg:gap-10 '>
-        
-        <SearchNav/>
+      <div className='flex flex-col px-5 py-8 lg:gap-10 lg:px-20 lg:py-12'>
 
         <div className='flex h-full lg:h-90 w-full rounded-xl pt-10'>
           <div key={actor?.data?.id || 'no-id'} className='flex lg:w-80 w-70 lg:h-full h-60 lg:w-60 rounded-xl'>
@@ -111,6 +131,7 @@ const Actor = () => {
               className='flex object-cover object-top items-center w-full rounded-xl'
               src={actor?.data?.image?.medium || actor?.data?.image?.original || "https://yt3.googleusercontent.com/Z1scaDhrH194d4AygOpJhFzM-ViGyvGLXfB5hGsNNlBRerrx98x9Knszx9-VWizx5lMZPlECOrE=s120-c-k-c0x00ffffff-no-rj"}
               alt={actor?.data?.name || "No image"}
+              loading="lazy"
             />
           </div>
           <div className='flex flex-col p-5 w-full justify-end gap-1'>
@@ -146,13 +167,14 @@ const Actor = () => {
                 <div
                   onClick={() => {
                     toast.error("Loading actor details...", { autoClose: 1000 });
-                    navigate(`/Actor/okSMTVmgluqwu2/${a?.person?.id}`);
+                    navigate(`/actor/${username}/${a?.person?.id}`);
                   }}
                   className='h-full w-50 lg:w-60' key={a?.person?.id || idx}>
                   <div className="relative h-60 w-40 lg:h-80 lg:w-60 items-center justify-center">
                     <img className="object-cover object-top w-full h-full rounded-xl h-full"
                       src={imgSrc}
-                      alt={a?.person?.name || "No image"} />
+                      alt={a?.person?.name || "No image"}
+                      loading="lazy" />
                     <div className="absolute bottom-0 w-full h-25 bg-gradient-to-t from-black/80 to-transparent flex items-end">
                       <p className='font-bold absolute bottom-4 left-4'>{a?.person?.name || "Unknown"}</p>
                     </div>
