@@ -15,15 +15,19 @@ const SearchNav = () => {
   const { username, keyword } = useParams();
   const [searchParams] = useSearchParams();
   const userInfo = useSelector((state) => state.note.users);
+  const currentUser = useSelector((state) => state.note.currentUser);
+  const activeUsername = currentUser?.username || username || "guest";
 
   useEffect(() => {
     const userDetails = userInfo.find((user) =>
-      user?.username?.includes(username),
+      user?.username?.includes(activeUsername),
     );
     if (userDetails) {
       setLoggedUser(userDetails.name);
+    } else {
+      setLoggedUser("");
     }
-  }, [userInfo, username]);
+  }, [activeUsername, userInfo]);
 
   useEffect(() => {
     setInput(keyword || "");
@@ -36,9 +40,15 @@ const SearchNav = () => {
   const handleSearch = (event) => {
     event.preventDefault();
 
+    if (!currentUser) {
+      navigate("/");
+      window.dispatchEvent(new Event("CineScope:auth-required"));
+      return;
+    }
+
     const trimmedInput = input.trim();
     if (!trimmedInput) {
-      navigate(`/search/${username}`);
+      navigate(currentUser ? `/search/${activeUsername}` : "/");
       return;
     }
 
@@ -49,7 +59,7 @@ const SearchNav = () => {
 
     const queryString = params.toString();
     navigate(
-      `/search/${username}/${trimmedInput}${queryString ? `?${queryString}` : ""}`,
+      `/search/${activeUsername}/${trimmedInput}${queryString ? `?${queryString}` : ""}`,
     );
   };
 
@@ -58,7 +68,7 @@ const SearchNav = () => {
       <div className=" mx-auto flex w-full max-w-7xl items-center gap-2 px-3 py-2 sm:gap-3 sm:px-4 lg:px-8">
         <button
           type="button"
-          onClick={() => navigate(`/search/${username}`)}
+          onClick={() => navigate(currentUser ? `/search/${activeUsername}` : "/")}
           className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl text-red-500 transition hover:scale-[1.03] hover:text-red-400 sm:h-11 sm:w-11"
           aria-label="Go to search home"
         >
@@ -110,7 +120,7 @@ const SearchNav = () => {
 
         <button
           type="button"
-          onClick={() => navigate(`/favorites/${username}`)}
+          onClick={() => navigate(`/favorites/${activeUsername}`)}
           className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-white/10 bg-white/[0.05] p-2 text-sm text-white transition hover:bg-white/[0.1]"
           aria-label="Open favorites"
         >
@@ -119,7 +129,7 @@ const SearchNav = () => {
 
         <button
           type="button"
-          onClick={() => navigate(`/profile/${username}`)}
+          onClick={() => navigate(`/profile/${activeUsername}`)}
           className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-white/10 bg-white/[0.05] p-[2px] transition hover:bg-white/[0.1]"
           aria-label={
             loggedUser ? `Open ${loggedUser} profile` : "Open profile"
@@ -128,7 +138,7 @@ const SearchNav = () => {
           <img
             className="h-full w-full rounded-[10px] object-cover"
             src={Icon}
-            alt={`${loggedUser || username} profile`}
+            alt={`${loggedUser || activeUsername} profile`}
             loading="lazy"
           />
         </button>

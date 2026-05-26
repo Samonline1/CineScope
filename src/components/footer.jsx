@@ -15,7 +15,7 @@ const footerLinks = [
   "Contact Us",
   "Speed Test",
   "Legal Notices",
-  "Only on Netflix",
+  "Only on CineScope",
 ];
 
 const Footer = () => {
@@ -76,7 +76,7 @@ const Footer = () => {
           </div>
 
           <div className="flex flex-col gap-2 text-sm text-gray-500 sm:items-end">
-            <p className="text-gray-300">Netflix India</p>
+            <p className="text-gray-300">CineScope India</p>
             <p className="max-w-md">
               This page is protected by Google reCAPTCHA to ensure you&apos;re not a bot.
               Learn more.

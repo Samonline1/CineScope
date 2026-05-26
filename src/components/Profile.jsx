@@ -1,12 +1,14 @@
 import React, { useEffect, useState } from "react";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, useParams } from "react-router-dom";
+import { logoutUser } from "../redux/featureSlice";
 import Footer from "./footer";
 
 const Profile = () => {
   const [userData, setUserData] = useState({});
   const { username } = useParams();
   const userInfo = useSelector((state) => state.note.users);
+  const dispatch = useDispatch();
 
   const navigate = useNavigate();
 
@@ -30,6 +32,11 @@ const Profile = () => {
       console.log("Register yourself!!");
     }
   }, [username, userInfo]);
+
+  const handleLogout = () => {
+    dispatch(logoutUser());
+    navigate("/", { replace: true });
+  };
 
   return (
     <div className="relative flex flex-col justify-center z-10 gap-5 space-y-6 h-full w-screen text-white bg-black/60 p-5 sm:p-8 lg:p-10">
@@ -68,6 +75,12 @@ const Profile = () => {
           className="px-5 py-2 rounded-xl bg-red-700 hover:bg-red-800"
         >
           Favorite
+        </button>
+        <button
+          onClick={handleLogout}
+          className="px-5 py-2 rounded-xl border border-red-500 bg-transparent text-red-400 hover:bg-red-500 hover:text-white"
+        >
+          Logout
         </button>
       </div>
 

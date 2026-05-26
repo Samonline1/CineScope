@@ -1,5 +1,5 @@
 {
-  "name": "netflix-clone",
+  "name": "CineScope-clone",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -36,5 +36,5 @@
     "tailwindcss": "^4.1.16",
     "vite": "^7.1.7"
   },
-  "homepage": "https://samonline1.github.io/Netflix/"
+  "homepage": "https://samonline1.github.io/CineScope/"
 }

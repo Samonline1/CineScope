@@ -10,6 +10,9 @@ const initialState = {
     users: localStorage.getItem("users")
         ? JSON.parse(localStorage.getItem("users"))
         : [],
+    currentUser: localStorage.getItem("currentUser")
+        ? JSON.parse(localStorage.getItem("currentUser"))
+        : null,
 };
 
 export const featureSlice = createSlice({
@@ -66,8 +69,18 @@ export const featureSlice = createSlice({
         registerUser: (state, action) => {
             const user = action.payload;
             state.users.push(user);
+            state.currentUser = user;
             localStorage.setItem("users", JSON.stringify(state.users));
+            localStorage.setItem("currentUser", JSON.stringify(state.currentUser));
             console.log("resister hogya");
+        },
+        loginUser: (state, action) => {
+            state.currentUser = action.payload;
+            localStorage.setItem("currentUser", JSON.stringify(state.currentUser));
+        },
+        logoutUser: (state) => {
+            state.currentUser = null;
+            localStorage.removeItem("currentUser");
         },
         updateNote: (state, action) => {
             const note = action.payload;
@@ -105,6 +118,8 @@ export const {
     addFav,
     deleteFav,
     registerUser,
+    loginUser,
+    logoutUser,
 } = featureSlice.actions;
 
 export default featureSlice.reducer;

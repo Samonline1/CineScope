@@ -5,6 +5,7 @@ import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { IoIosHeart } from "react-icons/io";
 import { addFav, deleteFav } from "../redux/featureSlice";
 import SearchHero from "./SearchHero";
+import AuthPopup from "./AuthPopup";
 
 const fallbackPoster =
   "https://yt3.googleusercontent.com/Z1scaDhrH194d4AygOpJhFzM-ViGyvGLXfB5hGsNNlBRerrx98x9Knszx9-VWizx5lMZPlECOrE=s120-c-k-c0x00ffffff-no-rj";
@@ -17,13 +18,14 @@ const SectionSkeletonHeading = () => (
   </div>
 );
 
-const SmtvSearch = () => {
+const CineScopeSearch = () => {
   const [search, setSearch] = useState("");
   const [movies, setMovies] = useState([]);
   const [actors, setActors] = useState([]);
   const [animes, setAnime] = useState([]);
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState(false);
+  const [showAuthPopup, setShowAuthPopup] = useState(false);
 
   const { username, keyword } = useParams();
   const navigate = useNavigate();
@@ -34,11 +36,38 @@ const SmtvSearch = () => {
   const actorRef = useRef(null);
   const animeRef = useRef(null);
   const userInfo = useSelector((state) => state.note.users);
-  const loggedInUser = userInfo.find((user) => user.username === username);
+  const currentUser = useSelector((state) => state.note.currentUser);
+  const activeUsername = currentUser?.username || username || "guest";
+  const loggedInUser = userInfo.find((user) => user.username === activeUsername);
   const favorites = loggedInUser?.favorites || [];
   const searchType = searchParams.get("type") || "All";
   const hasResults = movies.length > 0 || actors.length > 0 || animes.length > 0;
   const showHeroHome = !search.trim() && !hasResults && !errorMsg;
+
+  useEffect(() => {
+    if (currentUser) {
+      return undefined;
+    }
+
+    const handleAuthPrompt = () => {
+      setShowAuthPopup(true);
+    };
+
+    const timer = !username
+      ? window.setTimeout(() => {
+          setShowAuthPopup(true);
+        }, 3000)
+      : null;
+
+    window.addEventListener("CineScope:auth-required", handleAuthPrompt);
+
+    return () => {
+      if (timer) {
+        window.clearTimeout(timer);
+      }
+      window.removeEventListener("CineScope:auth-required", handleAuthPrompt);
+    };
+  }, [currentUser, username]);
 
   useEffect(() => {
     if (keyword && keyword.trim() !== "") {
@@ -66,6 +95,11 @@ const SmtvSearch = () => {
 
   const searchMovies = async (forcedSearch) => {
     const activeSearch = (forcedSearch ?? search).trim();
+
+    if (!currentUser) {
+      setShowAuthPopup(true);
+      return;
+    }
 
     try {
       setLoading(true);
@@ -136,25 +170,45 @@ const SmtvSearch = () => {
   };
 
   const openMovieDetails = (movieId) => {
-    navigate(`/details/${username}/${movieId}`);
+    if (!currentUser) {
+      setShowAuthPopup(true);
+      return;
+    }
+
+    navigate(`/details/${activeUsername}/${movieId}`);
     resetResults();
   };
 
   const openActorDetails = (actorId) => {
-    navigate(`/actor/${username}/${actorId}`);
+    if (!currentUser) {
+      setShowAuthPopup(true);
+      return;
+    }
+
+    navigate(`/actor/${activeUsername}/${actorId}`);
     resetResults();
   };
 
   const openAnimeDetails = (animeId) => {
-    navigate(`/anime/${username}/${animeId}`);
+    if (!currentUser) {
+      setShowAuthPopup(true);
+      return;
+    }
+
+    navigate(`/anime/${activeUsername}/${animeId}`);
     resetResults();
   };
 
   const setFavorite = (favoriteId) => {
+    if (!currentUser) {
+      setShowAuthPopup(true);
+      return;
+    }
+
     const existingFavorite = favorites.findIndex((item) => item.id === favoriteId);
 
     if (existingFavorite >= 0) {
-      dispatch(deleteFav({ username, favId: favoriteId }));
+      dispatch(deleteFav({ username: activeUsername, favId: favoriteId }));
       toast.info("Removed from favorites", { autoClose: 1000 });
       return;
     }
@@ -174,7 +228,7 @@ const SmtvSearch = () => {
           year: favoriteData.premiered,
         };
 
-        dispatch(addFav({ username, favorite: favoriteItem }));
+        dispatch(addFav({ username: activeUsername, favorite: favoriteItem }));
         toast.success("Added to favorites!", { autoClose: 1000 });
       } catch (error) {
         toast.error("Failed to add to favorites");
@@ -269,6 +323,17 @@ const SmtvSearch = () => {
   return (
     <div className="relative w-full overflow-hidden bg-black text-white">
       <ToastContainer position="top-right" />
+      <AuthPopup
+        isOpen={showAuthPopup}
+        dismissible={!!currentUser || !!username}
+        title="Login to keep watching"
+        subtitle="Sign in to search, save favorites, and open movie, anime, or actor details."
+        onClose={() => setShowAuthPopup(false)}
+        onSuccess={(user) => {
+          setShowAuthPopup(false);
+          navigate(keyword ? `/search/${user.username}/${keyword}` : `/search/${user.username}`);
+        }}
+      />
 
       {hasResults && (
         <div className="sticky top-[-5px] border-y border-white/10 bg-black/80 px-4 py-3 backdrop-blur-md">
@@ -441,4 +506,4 @@ const SmtvSearch = () => {
   );
 };
 
-export default SmtvSearch;
+export default CineScopeSearch;

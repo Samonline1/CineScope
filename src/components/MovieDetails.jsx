@@ -228,7 +228,7 @@ export default MovieDetails;
 //                             >#</p>
 
 //                             <img className='rounded-2xl h-full w-full object-cover'
-//                                 src={movie.show?.image ? movie.show?.image?.medium : "SMTV"} alt="" />
+//                                 src={movie.show?.image ? movie.show?.image?.medium : "CineScope"} alt="" />
 //                         </div>
 //                         <div className=' pl-4 pr-3 space-y-1 w[60%] mt-2 h-full '
 //
