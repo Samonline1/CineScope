@@ -1,7 +1,7 @@
 # CineScope
 
-## 1. Title + Hook
-CineScope is a Netflix-style movie discovery app that lets users search movies, actors, and anime in one place, then save favorites and open detailed pages after signing in.
+## 1. Title
+CineScope is a movie discovery app that lets users search movies, actors, and anime in one place, then save favorites and open detailed pages after signing in.
 
 <!-- ## 2. Screenshot / GIF
 Not available. -->
@@ -20,7 +20,7 @@ Finding entertainment options across different platforms can be fragmented and s
 - Add and remove favorites
 - Smooth section navigation and loading states
 - Toast notifications for search and favorite actions
-- Responsive Netflix-inspired UI
+- Responsive UI
 
 ## 6. Tech Stack
 - React
